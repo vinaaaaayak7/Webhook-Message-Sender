@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Webhook Message Sender — Embed Builder</title>
+<style>
+  :root{
+    --bg:#0a0f1c;
+    --panel:rgba(255,255,255,0.04);
+    --card:rgba(255,255,255,0.06);
+    --muted:#a6b1c0;
+    --accent-start:#5a8dee;
+    --accent-end:#a45cf7;
+    --embed-bg:#23272a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background:linear-gradient(135deg,#0a0f1c 0%, #121b2d 100%);
+    color:#e8eef7;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  header{
+    text-align:center;
+    padding:28px 16px;
+  }
+  header h1{
+    font-size:32px;
+    font-weight:800;
+    margin:0;
+    background:linear-gradient(90deg,var(--accent-start),var(--accent-end));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  header p{
+    color:var(--muted);
+    font-size:14px;
+    margin-top:8px;
+  }
+
+  .wrap{
+    max-width:1200px;
+    margin:0 auto;
+    padding:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+    justify-content:center;
+  }
+
+  .preview-card, .form-card{
+    background:var(--card);
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:16px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 4px 30px rgba(0,0,0,0.4);
+    padding:20px;
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .preview-card:hover, .form-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  .preview-title{
+    font-size:14px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:12px;
+  }
+
+  .discord-window{
+    background:#2b2f33;
+    border-radius:10px;
+    padding:16px;
+    min-height:320px;
+    border:1px solid rgba(255,255,255,0.04);
+    overflow-y:auto;
+  }
+  .webhook-head{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent-start),var(--accent-end));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    color:white;
+    font-size:16px;
+  }
+  .head-txt{font-size:14px; font-weight:600;}
+  .head-sub{font-size:12px; color:var(--muted);}
+
+  .embed{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    background:var(--embed-bg);
+    border-radius:8px;
+    padding:12px;
+    margin-bottom:12px;
+    border-left:6px solid var(--accent-start);
+  }
+  .embed .title{font-weight:700; font-size:14px;}
+  .embed .desc{color:var(--muted); font-size:13px; margin-top:4px; white-space:pre-wrap;}
+  .embed img.main-img{width:100%; max-height:220px; border-radius:6px; margin-top:6px;}
+  .embed .footer{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:6px;
+  }
+  .embed .footer img{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+
+  label{
+    font-size:13px;
+    color:var(--muted);
+    display:block;
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=url], textarea{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    color:white;
+    font-size:13px;
+    outline:none;
+    transition:all 0.2s ease;
+  }
+  input:focus, textarea:focus{
+    border-color:var(--accent-start);
+    box-shadow:0 0 6px var(--accent-start);
+  }
+  textarea{min-height:78px; resize:vertical;}
+
+  .btn{
+    padding:10px 16px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+    transition:all 0.2s ease;
+  }
+  .btn-add{
+    background:transparent;
+    color:var(--accent-start);
+    border:1px dashed rgba(255,255,255,0.15);
+  }
+  .btn-add:hover{
+    background:rgba(255,255,255,0.05);
+  }
+  .btn-ghost{
+    background:rgba(255,255,255,0.05);
+    color:var(--muted);
+  }
+  .btn-send{
+    background:linear-gradient(90deg,var(--accent-start),var(--accent-end));
+    color:white;
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+  }
+  .btn-send:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(0,0,0,0.5);
+  }
+
+  .controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .embed-item{
+    background:var(--panel);
+    padding:12px;
+    border-radius:10px;
+    margin-top:12px;
+    border:1px solid rgba(255,255,255,0.05);
+  }
+  
+    footer{
+    text-align:center;
+    padding:12px;
+    font-size:13px;
+    color:var(--muted);
+    background:rgba(255,255,255,0.02);
+    border-top:1px solid rgba(255,255,255,0.05);
+  }
+  footer span{
+    background:linear-gradient(90deg,var(--accent-start),var(--accent-end));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    font-weight:600;
+  }
+  
+    /* GitHub Star Button */
+  .github-star-btn {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .github-star-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  }
+
+  
+  @media (max-width:980px){
+    .wrap{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Webhook Message Sender</h1>
+  <p>Send custom messages and rich embeds to your Discord webhooks. Build, preview, and send multi-embed messages with a beautiful, modern interface.</p>
+</header>
+
+<div class="wrap">
+  <div class="preview-card" style="flex:1 1 500px">
+    <div class="preview-title">Live Preview</div>
+    <div class="discord-window" id="previewWindow">
+      <div class="webhook-head">
+        <div class="avatar" id="previewAvatar">W</div>
+        <div>
+          <div class="head-txt" id="previewName">Webhook Bot</div>
+          <div class="head-sub" id="previewTime">Your message will appear here...</div>
+        </div>
+      </div>
+      <div id="embedsPreview"></div>
+    </div>
+  </div>
+
+  <div class="form-card" style="flex:0 1 400px">
+    <label>Webhook URL</label>
+    <input id="webhookUrl" type="url" placeholder="https://discord.com/api/webhooks/...">
+    <label style="margin-top:12px">Username</label>
+    <input id="username" type="text" placeholder="Bot Username">
+    <label style="margin-top:12px">Avatar URL</label>
+    <input id="avatarUrl" type="url" placeholder="https://...">
+    <label style="margin-top:12px">Message</label>
+    <textarea id="content" placeholder="Type a plain content message..."></textarea>
+    <div id="embedsList"></div>
+    <div class="controls">
+      <button class="btn btn-add" id="addEmbedBtn">+ Add Embed</button>
+      <button class="btn btn-ghost" id="resetBtn">Reset</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-send" id="sendBtn">Send Message</button>
+    </div>
+    <div id="status" style="margin-top:10px; font-size:13px; color:var(--muted)"></div>
+  </div>
+</div>
+
+ <footer>
+    <a href="https://github.com/YourGitHubUsername/YourRepoName" target="_blank" class="github-star-btn">
+      ⭐ Give a Star on GitHub
+    </a>
+    <br>
+    Made with ❤️ by <span>Vinayak</span>
+  </footer>
+</body>
+</html>
+
+<script>
+const defaultEmbed = () => ({title:"",description:"",color:"#5865F2",image:"",footerText:"",footerIcon:""});
+let embeds=[defaultEmbed()];
+const $=id=>document.getElementById(id);
+function escapeHtml(s=''){return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');}
+
+function renderEmbedEditors(){
+  const list=$('embedsList');list.innerHTML='';
+  embeds.forEach((em,idx)=>{
+    const el=document.createElement('div');
+    el.className='embed-item';
+    el.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">Embed #${idx+1}</div>
+        <button data-idx="${idx}" class="btn-ghost small removeBtn" style="padding:4px 8px">Remove</button>
+      </div>
+      <input data-field="title" data-idx="${idx}" type="text" placeholder="Title" value="${escapeHtml(em.title)}"/>
+      <textarea data-field="description" data-idx="${idx}" placeholder="Description">${escapeHtml(em.description)}</textarea>
+      <input data-field="color" data-idx="${idx}" type="color" value="${em.color}" style="width:56px;height:40px;padding:4px;border-radius:8px"/>
+      <input data-field="image" data-idx="${idx}" type="url" placeholder="Embed Image URL" value="${escapeHtml(em.image)}"/>
+      <input data-field="footerText" data-idx="${idx}" type="text" placeholder="Footer Text" value="${escapeHtml(em.footerText)}"/>
+      <input data-field="footerIcon" data-idx="${idx}" type="url" placeholder="Footer Icon URL" value="${escapeHtml(em.footerIcon)}"/>
+    `;
+    list.appendChild(el);
+  });
+  list.querySelectorAll('input,textarea').forEach(inp=>{
+    inp.addEventListener('input',e=>{
+      const i=Number(e.target.dataset.idx),f=e.target.dataset.field;
+      embeds[i][f]=e.target.value;updatePreview();
+    });
+  });
+  list.querySelectorAll('.removeBtn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      const i=Number(e.target.dataset.idx);
+      embeds.splice(i,1);
+      if(!embeds.length)embeds.push(defaultEmbed());
+      renderEmbedEditors();updatePreview();
+    });
+  });
+}
+
+function updatePreview(){
+  const name=$('username').value||'Webhook Bot';
+  $('previewName').textContent=name;
+  $('previewTime').textContent='Your message will appear here...';
+  const av=$('avatarUrl').value;
+  if(av){
+    $('previewAvatar').style.background=`url(${av}) center/cover`;
+    $('previewAvatar').textContent='';
+  } else {
+    $('previewAvatar').style.background=`linear-gradient(135deg,var(--accent-start),var(--accent-end))`;
+    $('previewAvatar').textContent=(name[0]||'W').toUpperCase();
+  }
+  const ctn=$('embedsPreview');ctn.innerHTML='';
+  if($('content').value){
+    const p=document.createElement('div');
+    p.style.marginBottom='12px';
+    p.style.color='var(--muted)';
+    p.textContent=$('content').value;
+    ctn.appendChild(p);
+  }
+  embeds.forEach(em=>{
+    const e=document.createElement('div');e.className='embed';
+    e.style.borderLeftColor=em.color;
+    let footerHtml='';
+    if(em.footerText || em.footerIcon){
+      footerHtml=`<div class="footer">
+        ${em.footerIcon?`<img src="${escapeHtml(em.footerIcon)}" onerror="this.style.visibility='hidden'">`:''}
+        <div>${escapeHtml(em.footerText||'')}</div>
+      </div>`;
+    }
+    e.innerHTML=`
+      ${em.title?`<div class="title">${escapeHtml(em.title)}</div>`:''}
+      ${em.description?`<div class="desc">${escapeHtml(em.description)}</div>`:''}
+      ${em.image?`<img class="main-img" src="${escapeHtml(em.image)}" onerror="this.style.display='none'">`:''}
+      ${footerHtml}
+    `;
+    ctn.appendChild(e);
+  });
+}
+
+$('addEmbedBtn').onclick=()=>{embeds.push(defaultEmbed());renderEmbedEditors();updatePreview();};
+$('resetBtn').onclick=()=>{$('webhookUrl').value='';$('username').value='';$('avatarUrl').value='';$('content').value='';embeds=[defaultEmbed()];renderEmbedEditors();updatePreview();};
+['content','username','avatarUrl'].forEach(id=>$((id)).addEventListener('input',updatePreview));
+renderEmbedEditors();updatePreview();
+
+$('sendBtn').onclick=async()=>{
+  const url=$('webhookUrl').value.trim();
+  if(!url)return setStatus('Please enter a webhook URL',true);
+  const payload={
+    username:$('username').value||undefined,
+    avatar_url:$('avatarUrl').value||undefined,
+    content:$('content').value||undefined,
+    embeds:embeds.map(e=>{
+      const o={};
+      if(e.title)o.title=e.title;
+      if(e.description)o.description=e.description;
+      if(e.color)o.color=parseInt(e.color.replace('#',''),16);
+      if(e.image)o.image={url:e.image};
+      if(e.footerText || e.footerIcon)o.footer={text:e.footerText||undefined,icon_url:e.footerIcon||undefined};
+      return o;
+    })
+  };
+  try{
+    setStatus('Sending...',false);
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(res.ok)setStatus('Message sent successfully ✅',false);
+    else setStatus('Failed: '+res.status,true);
+  }catch(err){setStatus('Error: '+err.message,true);}
+};
+
+function setStatus(msg,err){
+  const s=$('status');
+  s.textContent=msg;
+  s.style.color=err?'#ffb3b3':'var(--muted)';
+}
+</script>
+</body>
+</html>
